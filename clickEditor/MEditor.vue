@@ -1,5 +1,5 @@
 /***
-*  @author misaka
+*  @author baiqi
 *  @date 2017/12/6
 */
 <style>
@@ -9,29 +9,45 @@
 </style>
 
 <template>
-    <Tooltip content="单击编辑" v-if="!edit" @click.native="edit=true" placement="top">
+    <Tooltip style="width: 100%;" content="单击编辑" v-if="!edit" @click.native="edit=true" placement="top">
         <span class="m-span"><slot></slot></span>
     </Tooltip>
-    <Input v-else-if="type=='input'" v-model="currentValue" :type="inputType" @keydown.native.enter="close" :autofocus="true"/>
-    <Select
-            v-else-if="type=='select'"
-            v-model="currentSelectValue"
-            :label-in-value="true"
-            :filterable="filterable"
-            :multiple="multiple"
-            :loading="loading"
-            @on-query-change = 'onQuery'
-            @on-change="closeSelect">
-        <slot name="option"></slot>
-    </Select>
+    <div v-else-if="type=='input'">
+        <Input class="c-input" v-model="currentValue" :type="inputType" @keydown.native.enter="close" :autofocus="true"/></Input>
+        <Button class="c-btn"  type="text" icon="checkmark-round" @click="close"></Button>
+        <Button class="c-btn-red" type="text" icon="close-round" @click="cancelClose"></Button>
+    </div>
+    <div  v-else-if="type=='select'">
+        <i-select
+                class="c-input"
+                v-model="selectValue"
+                :label-in-value="true"
+                :filterable="filterable"
+                :multiple="multiple"
+                :loading="loading"
+                @on-query-change = 'onQuery'
+                @on-change="changeSelect">
+            <i-option v-for="item in List" :value="item.url" :key="item.id">{{item.name}}</i-option>
+        </i-select>
+        <i-button class="c-btn"  type="text" icon="checkmark-round" @click="closeSelect(changeData)"></i-button>
+        <i-button class="c-btn-red" type="text" icon="close-round" @click="closeSelect(0)"></i-button>
+    </div>
 </template>
 
 <script>
     export default {
         props:{
+            List:{
+                type:Array,
+                default: function () {
+                    return []
+                }
+            },
             value:{
-                type:[String,Number,Object,Array],
-                required:true
+                type:[String,Number,Object,Array]
+            },
+            seleValue:{
+                type:[String,Number,Object,Array]
             },
             type:{
                 type:String,
@@ -57,20 +73,38 @@
         data(){
             return {
                 edit:false,
+                originalData:null,
                 currentValue:this.value,
-                currentSelectValue:this.value
+                currentSelectValue:this.value,
+                selectValue: this.seleValue,
+                changeData:null
             };
         },
         methods:{
             close(){
                 this.edit = false;
                 this.$emit('input',this.currentValue);
+                this.originalData = this.currentValue;
+            },
+            cancelClose (){
+                this.edit = false;
+                this.currentValue = this.originalData;
+                // this.$emit('input',this.originalData);
+            },
+            changeSelect(value){
+                this.changeData = value;
             },
             closeSelect(value){
                 if(!this.multiple){
                     this.edit = false;
                 }
-                this.$emit('input',value);
+                if( value == 0 || this.changeData == null ){
+                    this.$emit('input',this.seleValue);
+                    this.selectValue = this.seleValue;
+                    this.changeData = null;
+                }else {
+                    this.$emit('input',value);
+                }
             },
             onQuery(value){
                 this.$emit('on-query',value);
@@ -78,6 +112,9 @@
             finish(){
                 this.edit = false;
             }
+        },
+        mounted(){
+            this.originalData = this.value;
         }
     };
 </script>

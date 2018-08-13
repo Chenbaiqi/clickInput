@@ -1,5 +1,5 @@
 /***
- *  @author misaka
+ *  @author baiqi
  *  @date 2017/12/6
  */
 var MEditor = {
@@ -80,8 +80,8 @@ var MEditor = {
         },
         cancelClose (){
             this.edit = false;
-            this.$emit('input',this.originalData);
             this.currentValue = this.originalData;
+            // this.$emit('input',this.originalData);
         },
         changeSelect(value){
             this.changeData = value;
