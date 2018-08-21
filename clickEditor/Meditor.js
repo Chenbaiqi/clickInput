@@ -81,7 +81,6 @@ var MEditor = {
         cancelClose (){
             this.edit = false;
             this.currentValue = this.originalData;
-            // this.$emit('input',this.originalData);
         },
         changeSelect(value){
             this.changeData = value;
